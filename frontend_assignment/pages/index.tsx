@@ -5,9 +5,21 @@ import { providers } from "ethers"
 import Head from "next/head"
 import React from "react"
 import styles from "../styles/Home.module.css"
+import { useForm } from "react-hook-form"
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from "yup"
+
+const schema = yup.object({
+    name: yup.string().required().max(20),
+    address: yup.string().required(),
+    age: yup.number().positive().integer().required().min(18).max(99),
+  }).required()
 
 export default function Home() {
     const [logs, setLogs] = React.useState("Connect your wallet and greet!")
+    const { register, handleSubmit } = useForm({
+        resolver: yupResolver(schema)
+      });
 
     async function greet() {
         setLogs("Creating your Semaphore identity...")
@@ -59,6 +71,10 @@ export default function Home() {
         }
     }
 
+    function onSubmit(data: Record<string, any>) {
+        console.log(data);
+    }
+
     return (
         <div className={styles.container}>
             <Head>
@@ -77,6 +93,13 @@ export default function Home() {
                 <div onClick={() => greet()} className={styles.button}>
                     Greet
                 </div>
+
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <input {...register("name", { required: true, maxLength: 20 })} />
+                    <input {...register("address", { required: true })} />
+                    <input type="number" {...register("age", { required: true, min: 18, max: 99 })} />
+                    <input type="submit" />
+                </form>
             </main>
         </div>
     )
